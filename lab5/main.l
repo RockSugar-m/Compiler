@@ -3,9 +3,10 @@
     #include"common.h"
     #include"main.tab.hh"
     int lineno=0;
-    vector<IDAttributes> SymbolsTable;
-    int flag;
+    extern vector<IDAttributes> SymbolsTable;
+    // int flag;
     bool for_flag=false;
+    stack<int> flag;
 %}
 
 INTEGER (0|[1-9][0-9]*)
@@ -24,8 +25,15 @@ ConstChar (\'.?\')
 
 {EOL} {++lineno;}
 
-{BlockComm}
-{LineComm}
+{BlockComm} {
+        string str=string(yytext);
+        int index=0; 
+    	while( (index=str.find("\n",index)) < str.length() ){
+		++lineno;
+		index++;
+	}
+}
+{LineComm} {++lineno;}
 
 "true" {
     TreeNode *node = new TreeNode(NODE_BOOL, lineno);
@@ -97,18 +105,22 @@ ConstChar (\'.?\')
 "]" return RBRACK;
 "{" {
     if(for_flag){
-        flag = SymbolsTable.size()-1;
+        // flag = SymbolsTable.size()-1;
+        flag.push(SymbolsTable.size()-1);
         for_flag=false;
     }
-    else
-        flag = SymbolsTable.size();
+    else{
+        // flag = SymbolsTable.size();
+        flag.push(SymbolsTable.size());
+    }
     return LBRACE;
 }
 "}" {
-    int t = SymbolsTable.size()-flag;
+    int t = SymbolsTable.size()-flag.top();
     for(int i=0;i<t;i++){
         SymbolsTable.pop_back();
     }
+    flag.pop();
     return RBRACE;
 }
 ";" return SEMICOLON;
@@ -129,6 +141,20 @@ ConstChar (\'.?\')
 {ID} {
     TreeNode *node = new TreeNode(NODE_VAR, lineno);
     node->var_name = string(yytext);
+    bool f=false;
+    IDAttributes id;
+    for(int i=SymbolsTable.size()-1;i>=0;i--){
+        if(node->var_name==SymbolsTable[i].var_name){
+           f=true;
+           id=SymbolsTable[i];
+           break;
+        }
+    }
+    if(f){
+         node->varType=id.var_type;
+    }else{
+        //error未定义变量
+    }
     yylval = node;
     return ID;
 }

@@ -3,6 +3,7 @@
 
 #include "tree.h"
 #include <vector>
+#include <stack>
 #define YYSTYPE TreeNode *                                                                                                                                                                                                                                                                                                                                                              
 
 struct IDAttributes

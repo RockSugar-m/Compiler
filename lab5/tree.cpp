@@ -72,6 +72,9 @@ void TreeNode::printNodeInfo(){
     case NODE_OP:
         printf("Operator:%-3s ", opTypeTostring(opType).c_str());
         break;
+    case NODE_NULL:
+        printf("null_node");
+        break;
     default:
         break;
     }
@@ -131,7 +134,11 @@ string TreeNode::NodeTypeTostring(NodeType type){
         case NODE_OP:
             return "NODE_OP";
             break;
+        case NODE_NULL:
+            return "NODE_NULL";
+            break;
         default:
+            return "";
             break;
         }
     }
@@ -162,7 +169,17 @@ string TreeNode::StmtTypeTostring(StmtType type){
         case STMT_FORCONDITION:
             return "for_condition";
             break;
+        case STMT_RETURN:
+            return "return";
+            break;
+        case STMT_BREAK:
+            return "break";
+            break; 
+        case STMT_COMPOUND:
+            return "compound_stmt";
+            break;
         default:
+            return "";
             break;
         }
     }
@@ -242,6 +259,7 @@ string TreeNode::opTypeTostring(OpType type){
             return "&";
             break;
         default:
+            return "";
             break;
         }
     }
@@ -261,6 +279,7 @@ string TreeNode::VarTypeTostring(VarType type){
             return "string";
             break;
         default:
+            return "";
             break;
         }
     }

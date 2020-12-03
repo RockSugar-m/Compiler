@@ -14,7 +14,8 @@ enum NodeType{
     NODE_VAR,
     NODE_BOOL,
     NODE_EXPR, 
-    NODE_OP
+    NODE_OP,
+    NODE_NULL
 };
 
 enum StmtType{
@@ -26,7 +27,10 @@ enum StmtType{
     STMT_SCANF,
 
     STMT_FOR,
-    STMT_FORCONDITION
+    STMT_FORCONDITION,
+    STMT_RETURN,
+    STMT_BREAK,
+    STMT_COMPOUND
 
 };
 

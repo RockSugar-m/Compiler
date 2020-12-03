@@ -13,6 +13,9 @@ void main() {
         int a;
         a = 10;
         s += a;
+        for(;a<15;a++){
+            int c=10;
+        }
         if(-s < -10) {
             printf("result is: %d\n", s);
             int b;
@@ -20,7 +23,11 @@ void main() {
             for(int i=0; i<b; i++) {
                 printf("Have fun: %d\n", i);
             }
+        }else {
+            int b=11;
         }
+        
     }
+    return 0;
 }
 // No more compilation error.

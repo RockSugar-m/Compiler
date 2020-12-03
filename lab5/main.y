@@ -5,7 +5,7 @@
     int yyerror( char const * );
     extern int lineno;
     extern vector<IDAttributes> SymbolsTable;
-    extern int flag;
+    extern stack<int> flag;
     extern bool for_flag;
 %}
 %defines
@@ -58,12 +58,20 @@ if_else
         node->addChild($3);
         $$=node;
     }
-    | IF bool_statment statement ELSE statement {
+    | IF bool_statment compound_stmt ELSE compound_stmt {
         TreeNode *node=new TreeNode(NODE_STMT, $2->line);
         node->stmtType=STMT_IF;
         node->addChild($2);
         node->addChild($3);
         node->addChild($5);
+        $$=node;
+    }
+    ;
+compound_stmt
+    : LBRACE statements RBRACE {
+        TreeNode *node=new TreeNode(NODE_STMT, $1->line);
+        node->stmtType=STMT_COMPOUND;
+        node->addChild($2);
         $$=node;
     }
     ;
@@ -98,10 +106,10 @@ for_statment
     | expr SEMICOLON bool_expr SEMICOLON expr{
         TreeNode *node=new TreeNode(NODE_STMT, lineno);
         node->stmtType=STMT_FORCONDITION;
-        node->addChild($1);
-        node->addChild($3);
-        node->addChild($5);
-        $$=node;
+            node->addChild($1);
+            node->addChild($3);
+            node->addChild($5);
+            $$=node;
     }
     ;
 bool_statment
@@ -113,16 +121,17 @@ declare
         node->stmtType=STMT_DECL;
 
         TreeNode *t=$2;
-        while(t->sibling){
+        while(t){
             IDAttributes id;
             bool repeat=false;
             if(t->nodeType==NODE_OP){// 声明变量且带有赋值表达式
-                if(flag==SymbolsTable.size()){// 此作用域还没有任何变量
+                t->child[0]->varType=$1->varType;
+                if(flag.size()==0||flag.top()==SymbolsTable.size()){// 此作用域还没有任何变量
                     id.var_name=t->child[0]->var_name;
                     id.var_type=t->child[0]->varType;
                     SymbolsTable.push_back(id);
                 }else{
-                    for(int i=flag;i<SymbolsTable.size();i++){// 作用域存在变量，遍历符号表，查找是否有同名变量
+                    for(int i=flag.top();i<SymbolsTable.size();i++){// 作用域存在变量，遍历符号表，查找是否有同名变量
                         if(SymbolsTable[i].var_name==t->child[0]->var_name){
                             repeat=true;
                             break;
@@ -134,15 +143,17 @@ declare
                         SymbolsTable.push_back(id);
                     }else{
                         // error
+                        
                     }
                 }
             }else{// 声明变量不带有赋值表达式
-                if(flag==SymbolsTable.size()){
+                t->varType=$1->varType;
+                if(flag.size()==0||flag.top()==SymbolsTable.size()){
                     id.var_name=t->var_name;
                     id.var_type=t->varType;
                     SymbolsTable.push_back(id);
                 }else{
-                    for(int i=flag;i<SymbolsTable.size();i++){
+                    for(int i=flag.top();i<SymbolsTable.size();i++){
                         if(SymbolsTable[i].var_name==t->var_name){
                             repeat=true;
                             break;
@@ -154,6 +165,7 @@ declare
                         SymbolsTable.push_back(id);
                     }else{
                         // error
+                        
                     }
                 }
                 
@@ -169,6 +181,17 @@ declare
 instruction
     : expr SEMICOLON {
         $$=$1;  
+    }
+    | RETURN expr SEMICOLON {
+        TreeNode *node=new TreeNode(NODE_STMT, lineno);
+        node->stmtType=STMT_RETURN;
+        node->addChild($2);
+        $$=node;
+    }
+    | BREAK SEMICOLON {
+        TreeNode *node=new TreeNode(NODE_STMT, lineno);
+        node->stmtType=STMT_BREAK;
+        $$=node;
     }
     | printf SEMICOLON {$$=$1;}
     | scanf SEMICOLON {$$=$1;}
@@ -259,6 +282,10 @@ bool_expr
         node->opType=OP_LOR;
         node->addChild($1);
         node->addChild($3);
+        $$=node;
+    }
+    |  {
+        TreeNode *node=new TreeNode(NODE_NULL, lineno);
         $$=node;
     }
     ;
@@ -366,6 +393,10 @@ expr
         node->addChild($1);
         node->addChild($3);
         $$=node;  
+    }
+    |  {
+        TreeNode *node=new TreeNode(NODE_NULL, lineno);
+        $$=node;
     }
     ;
 assign_expr
