@@ -17,7 +17,7 @@ BlockComm (\/\/.*\n)|(\/\*(\n|.)*?\*\/)
 LineComm (\/\/.*\n?)
 
 ConstStr (\".*\")
-ConstChar (\'.?\')
+ConstChar (\'.+\')
 
 %%
 
@@ -142,6 +142,10 @@ ConstChar (\'.?\')
 {ID} {
     TreeNode *node = new TreeNode(NODE_VAR, lineno);
     node->var_name = string(yytext);
+    int i = SymbolsTable.lookup(node->var_name);
+    if(i!=-1){
+        node->varType=(VarType)SymbolsTable.table[i].type;
+    }
     yylval = node;
     return ID;
 }
@@ -157,9 +161,13 @@ ConstChar (\'.?\')
     TreeNode *node = new TreeNode(NODE_CONST, lineno);
     string s = string(yytext);
     node->char_val = s.at(1);
-    node->str_val = s.substr(1,1);
+    node->str_val = "\"";
+    node->str_val += node->char_val;
+    if(s.at(1)=='\\')
+        node->str_val += s.at(2);
+    node->str_val += "\"";
     node->var_name = "ConstChar";
-    node->type= VAR_STRING;
+    node->type=VAR_CHAR;
     yylval = node;
     return ConstChar;
 }

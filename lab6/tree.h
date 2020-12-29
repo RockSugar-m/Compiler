@@ -122,7 +122,7 @@ struct TreeNode {
     int int_val; // 节点为常量时，相对应的类型存储其值
     bool bool_val; // 布尔常量
     string str_val;
-    char char_val;
+    string char_val;
 
     StmtType stmtType; // 节点为其他类型时，存储其内容
     OpType opType; // 节点为表达式节点

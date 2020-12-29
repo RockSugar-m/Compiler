@@ -1058,10 +1058,15 @@ void tree::gen_decl(ostream &out, TreeNode *t)
 {
     for (TreeNode *p = t->child[1]; p; p = p->sibling)
     {
-        if (p->type == VAR_INTEGER)
+        if (p->nodeType==NODE_VAR && p->type == VAR_INTEGER){
             out << "_" << p->var_name << ":" << endl;
-        // if (p->type == VAR_CHAR)
-        //     out << "_" << p->var_name << ":" << endl;
+        }
+        else if (p->nodeType==NODE_VAR && p->type == VAR_CHAR){
+            out << "_" << p->var_name << ":" << endl;
+        }
+        else if (p->nodeType==NODE_EXPR && p->opType==OP_ASSIGN){
+            out << "_" << p->child[0]->var_name << ":" << endl;
+        }
         out << "\t.zero\t4" << endl;
         out << "\t.align\t4" << endl;
     }
@@ -1087,12 +1092,12 @@ void tree::gen_code(ostream &out)
         out << "t" << i << ":" << endl;
         out << "\t.zero\t4" << endl;
         out << "\t.align\t4" << endl;
-    }
-
+    }  
     out << endl;
+
+    out<< "\t.section .rodata" << endl;
     for (int i = 0; i < const_str_all; i++)
     {
-        out<< "\t.section .rodata" << endl;
         out << "STR" << i << ":" << endl;
         out << "\t.string\t" << str_table[i] << "" << endl;
         out << "\t.align\t4" << endl;

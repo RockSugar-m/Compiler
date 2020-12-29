@@ -98,7 +98,6 @@ for_statment
         node->addChild($1);
         node->addChild($2);
         node->addChild($4);
-        //for_flag=true;
         $$=node;
     }
     | expr SEMICOLON bool_expr SEMICOLON expr{
@@ -120,10 +119,13 @@ declare
         TreeNode *t=$2;
         while(t){
             if(t->nodeType==NODE_EXPR){// 声明变量且带有赋值表达式
+                t->child[0]->varType=$1->varType;
+                t->child[0]->type=$1->type;
                 if(SymbolsTable.lookup(t->child[0]->var_name)==-1)
                     SymbolsTable.insert(t->child[0]->var_name, t->child[0]->varType);
             }else{// 声明变量不带有赋值表达式
                 t->varType=$1->varType;
+                t->type=$1->type;
                 if(SymbolsTable.lookup(t->var_name)==-1)
                     SymbolsTable.insert(t->var_name, t->varType);
             }
@@ -366,21 +368,25 @@ type
     : INT {
         TreeNode *node=new TreeNode(NODE_TYPE, lineno);
         node->varType=VAR_INTEGER;
+        node->type=VAR_INTEGER;
         $$=node;
     }
     | VOID {
         TreeNode *node=new TreeNode(NODE_TYPE, lineno);
         node->varType=VAR_VOID;
+        node->type=VAR_VOID;
         $$=node;         
     }
     | CHAR {
         TreeNode *node=new TreeNode(NODE_TYPE, lineno);
         node->varType=VAR_CHAR;
+        node->type=VAR_CHAR;
         $$=node;   
     }
     | BOOL {
         TreeNode *node=new TreeNode(NODE_TYPE, lineno);
         node->varType=VAR_BOOL;
+        node->type=VAR_BOOL;
         $$=node;   
     }
     ;
