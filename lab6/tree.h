@@ -7,9 +7,7 @@
 using namespace std;
 
 extern symbol_table SymbolsTable; 
-// bool decl_flag = false;
-// int NodeNum = 0;
-// string str_table[10];
+//节点类型
 enum NodeType{
     NODE_PROG,
     NODE_STMT,
@@ -112,12 +110,7 @@ struct TreeNode {
     void addChild(TreeNode *);
     void addSibling(TreeNode *);
 
-    void genNodeId();//从根节点开始逐个赋Id 实现方式同学们可以自行修改
-
     void printAST();//打印语法树结点
-    void printNodeInfo();
-    void printNodeConnection();
-    string nodeTypeInfo();
 
     int int_val; // 节点为常量时，相对应的类型存储其值
     bool bool_val; // 布尔常量
@@ -128,50 +121,37 @@ struct TreeNode {
     OpType opType; // 节点为表达式节点
     VarType varType;
 
-    VarType type;
-    string var_name;
+    VarType type; // 用于存储id，expression，const的类型，与varType有一定功能上的重复，有时间再改
+    string var_name; // 变量名
 
     TreeNode(NodeType type, int lineno);
 
-    string NodeTypeTostring(NodeType type);
-    string StmtTypeTostring(StmtType type);
-    string opTypeTostring(OpType type);
-    string VarTypeTostring(VarType type);
-
-    int temp_var=0;
+    int temp_var=0; // 记录节点临时变量的序号，也就是生成汇编时的临时变量tn
     Label label;
-    int const_str=0;
+    int const_str=0; // 记录所有出现的字符以及字符串常量的序号，也就是生成汇编时的常量STRn
 
-    void type_check();
+    void type_check(); // 类型检查
 };
 
-class tree
-{
+class tree{
 public:
 	TreeNode *root;
-	int node_seq = 0;
-	int temp_var_seq = 0;
-	int label_seq = 0;
-    int const_str_seq = 0 ;
+	int label_seq = 0; // label的总数
 
-	void get_temp_var(TreeNode *t);
-    void get_const_str(TreeNode *t);
-	string new_label(void);
-	void recursive_get_label(TreeNode *t);
-	void stmt_get_label(TreeNode *t);
-	void expr_get_label(TreeNode *t);
-	void gen_header(ostream &out);
-	void gen_decl(ostream &out, TreeNode *t);
-	void recursive_gen_code(ostream &out, TreeNode *t);
-	void stmt_gen_code(ostream &out, TreeNode *t);
-	void expr_gen_code(ostream &out, TreeNode *t);
+	string new_label(void); // 生成一个新序号的label
+	void recursive_get_label(TreeNode *t); // 递归生成label
+	void stmt_get_label(TreeNode *t); // 为NODE_STMT生成label
+	void expr_get_label(TreeNode *t); // 为NODE_EXPR生成label
 
-	void get_label(void);
-	void gen_code(ostream &out);
+	void gen_decl(TreeNode *t); // 声明变量，均生成为bss段，不为其声明类型，赋值时自动获得类型
+	void recursive_gen_code(TreeNode *t); // 递归生成汇编代码
+	void stmt_gen_code(TreeNode *t); // 为NODE_STMT生成汇编代码
+	void expr_gen_code(TreeNode *t); // 为NODE_EXPR生成汇编代码
+
+	void get_label(void); // 生成label
+	void gen_code();
     tree(TreeNode *node){
         root = node;
-        temp_var_seq=root->temp_var;
-        const_str_seq=root->const_str;
     }
 };
 #endif

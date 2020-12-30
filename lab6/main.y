@@ -21,9 +21,9 @@
 %token LAND LOR NOT
 %token PRINTF SCANF
 
-%left COMMA
+%right COMMA
 %right ASSIGN AASSIGN SASSIGN MASSIGN
-%left LAND LOR
+%right LAND LOR
 %left EQUAL NOTEQUAL
 %left GT GTE LT LTE
 %left ADD SUB
@@ -65,6 +65,14 @@ if_else
         $$=node;
     }
     | IF bool_statment compound_stmt ELSE compound_stmt {
+        TreeNode *node=new TreeNode(NODE_STMT, $2->line);
+        node->stmtType=STMT_IF;
+        node->addChild($2);
+        node->addChild($3);
+        node->addChild($5);
+        $$=node;
+    }
+    | IF bool_statment compound_stmt ELSE if_else {
         TreeNode *node=new TreeNode(NODE_STMT, $2->line);
         node->stmtType=STMT_IF;
         node->addChild($2);

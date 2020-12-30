@@ -11,7 +11,7 @@ run: main
 test:main
 	for file in $(basename $(shell find test/*.c)); \
 	do \
-		./main.out <$$file.c >$$file.res; \
+		./main.out <$$file.c >$$file.s; \
 	done
 clean:
-	rm -f *.output *.yy.* *.tab.* *.out test/*.res *.s
+	rm -f *.output *.yy.* *.tab.* *.out test/*.res test/*.out test/*.s
